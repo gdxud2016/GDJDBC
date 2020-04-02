@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package cn.xgd.jdbc.connection;
 
 /**  

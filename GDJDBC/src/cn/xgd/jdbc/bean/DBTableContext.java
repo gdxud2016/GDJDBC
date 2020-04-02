@@ -22,12 +22,12 @@ public class DBTableContext {
     public static  Map<String,DBTableInfo> tables=new HashMap<>();     
 
     /**
-     * 将po的class对象和表关联
+     * 将的class对象和表关联
      */
     public static Map<Class, DBTableInfo> poClassTableMap=new HashMap<>();  
     
     private DBTableContext(){};
-                                                                                       //无参构造很重要
+       //无参构造很重要
 
     static{
         try {
@@ -48,7 +48,7 @@ public class DBTableContext {
                 
                 ResultSet set=dbmd.getColumns(null, "%", tableName ,"%");      //这里根据表名获取字段集，
                 while(set.next()){
-                	DBColumnKey ci= new DBColumnKey(set.getString("COLUMN_NAME"),set.getString("TYPE_NAME"));//可以看出这里获取了字段的名字和类型
+                	DBColumnKey ci= new DBColumnKey(set.getString("COLUMN_NAME"),set.getString("TYPE_NAME"));
                     ti.getKeysSet().put(set.getString("COLUMN_NAME"),ci);               //这里是放到表映射，加载表的字段
                 }
                 
@@ -87,9 +87,7 @@ public class DBTableContext {
     	//这里就是用反射把这个类和产生自哪个表放在了一个表里，在后面的操作有用
         for(DBTableInfo tableInfo:tables.values()){
             try{
-//                Class c=Class.forName(GDConfiguration.shareConfiguration().getPackageName()+
-//                        "."+StringUTils.firstChar2UpCase(tableInfo.getTab_name()));
-//                poClassTableMap.put(c, tableInfo);
+
             }catch(Exception e){
                 e.printStackTrace();
                 
