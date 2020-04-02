@@ -13,7 +13,7 @@ import cn.xgd.jdbc.connection.GDDBManager;
 
 /**  
  * 
- * @author xgd  
+ * @author xgd
  * @date 2020年3月31日  
  */
 public class DBTableContext {
@@ -79,7 +79,7 @@ public class DBTableContext {
     	//这里就通过这个tables表然后用后面的一个java类实现了在项目中构造java类
         Map<String,DBTableInfo> map= DBTableContext.tables;           
         for(DBTableInfo t:map.values()){
-            JavaFileUtils.createJavaPOFile(t, new MysqlTypeConventor());
+
         }    
     }
                                                                    
@@ -87,9 +87,9 @@ public class DBTableContext {
     	//这里就是用反射把这个类和产生自哪个表放在了一个表里，在后面的操作有用
         for(DBTableInfo tableInfo:tables.values()){
             try{
-                Class c=Class.forName(GDConfiguration.shareConfiguration().getPackageName()+
-                        "."+StringUTils.firstChar2UpCase(tableInfo.getTab_name()));
-                poClassTableMap.put(c, tableInfo);
+//                Class c=Class.forName(GDConfiguration.shareConfiguration().getPackageName()+
+//                        "."+StringUTils.firstChar2UpCase(tableInfo.getTab_name()));
+//                poClassTableMap.put(c, tableInfo);
             }catch(Exception e){
                 e.printStackTrace();
                 

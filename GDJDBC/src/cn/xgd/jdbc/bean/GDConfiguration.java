@@ -3,8 +3,6 @@
  */
 package cn.xgd.jdbc.bean;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -65,6 +63,11 @@ public class GDConfiguration {
 
 	public String getDBLinker() {
 		return DBLinker;
+	}
+
+	
+	public String getUsername() {
+		return username;
 	}
 
 	public String getPassword() {
