@@ -32,6 +32,7 @@ public class DBTableInfo {
 	private DBColumnKey primary_key;
 	
 	public DBTableInfo(){
+		this.primaryKeysSet = new ArrayList<DBColumnKey>();
 	}
 	
 
@@ -40,7 +41,6 @@ public class DBTableInfo {
 		this.tab_name = tab_name;
 		this.primary_key = primary_key;
 		this.keysSet = new HashMap<String, DBColumnKey>();
-		this.primaryKeysSet = new ArrayList<DBColumnKey>();
 	}
 	
 	public DBTableInfo(String tab_name, Map<String,DBColumnKey> keysSet, DBColumnKey primary_key) {
@@ -48,7 +48,6 @@ public class DBTableInfo {
 		this.tab_name = tab_name;
 		this.keysSet = keysSet;
 		this.primary_key = primary_key;
-		this.primaryKeysSet = new ArrayList<DBColumnKey>();
 	}
 
 

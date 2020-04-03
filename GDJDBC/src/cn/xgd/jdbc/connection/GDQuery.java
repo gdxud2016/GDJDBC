@@ -1,5 +1,6 @@
 
-package cn.xgd.jdbc.connection;
+package	cn.xgd.jdbc.connection;
+		
 
 /**  
  * 数据库查询接口
@@ -7,5 +8,6 @@ package cn.xgd.jdbc.connection;
  * @date 2020年3月31日  
  */
 public interface GDQuery {
+		
 	
 }

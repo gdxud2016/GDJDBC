@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.xgd.jdbc.connection.GDDBManager;
+import cn.xgd.jdbc.utils.GDJavaUtils;
+import cn.xgd.jdbc.utils.GDStringUtils;
 
 /**  
  * 
@@ -55,7 +57,6 @@ public class DBTableContext {
                 ResultSet set2=dbmd.getPrimaryKeys(null, "%", tableName);
                 while(set2.next()){                                                               
                     DBColumnKey ci2 = (DBColumnKey)ti.getKeysSet().get(set2.getObject("COLUMN_NAME"));
-                    ci2.setType_name("1");
                     ti.getPrimaryKeysSet().add(ci2);
                 }
                 if(ti.getKeysSet().size()>0){
@@ -69,17 +70,14 @@ public class DBTableContext {
             // TODO: handle exception
         }
       //因为我们要再数据库中操作，程序事先是不知道你表中得每一项叫什么名字就没办法根据数据可定义好类，在用类来操作数据库    
-        updataJavaPOFile();
-      //这里我们就可以根据数据库中获取的表框架，获取表的名字，表中字段类型，生成这个数据库的java类                                                              
-        //然后是每次加载这个类的时候更新　　　　　　　　　　　　　　　　　　　　　
-        loadPOTables();                                            
+        updataJavaPOFile();                                         
     }
                                                                 
     public static void updataJavaPOFile(){
     	//这里就通过这个tables表然后用后面的一个java类实现了在项目中构造java类
         Map<String,DBTableInfo> map= DBTableContext.tables;           
         for(DBTableInfo t:map.values()){
-
+        	GDJavaUtils.buildJavaClassFromTableInfo(t);
         }    
     }
                                                                    
@@ -87,7 +85,9 @@ public class DBTableContext {
     	//这里就是用反射把这个类和产生自哪个表放在了一个表里，在后面的操作有用
         for(DBTableInfo tableInfo:tables.values()){
             try{
-
+            	String className = GDStringUtils.uppercaseString(tableInfo.getTab_name());
+            	Class<?> cls = Class.forName(className);
+            	poClassTableMap.put(cls , tableInfo);
             }catch(Exception e){
                 e.printStackTrace();
                 

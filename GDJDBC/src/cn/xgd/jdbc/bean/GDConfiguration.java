@@ -37,6 +37,7 @@ public class GDConfiguration {
 			this.username = p.getProperty("username");
 			this.password = p.getProperty("password");
 			this.beanPath = p.getProperty("beanPath");
+			this.packageName = p.getProperty("package");
 			this.poolMax = Integer.valueOf(p.getProperty("poolMax"));
 			this.poolMin = Integer.valueOf(p.getProperty("poolMin"));
 		} catch (IOException e) {

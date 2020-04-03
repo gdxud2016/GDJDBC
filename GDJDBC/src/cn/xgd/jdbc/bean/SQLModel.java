@@ -7,5 +7,6 @@ package cn.xgd.jdbc.bean;
 public class SQLModel {
 	public String name;
 	public Integer id;
+	
 //	public 
 }
