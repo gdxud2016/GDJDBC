@@ -1,9 +1,11 @@
 package cn.xgd.jdbc.connection;
 
+import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,64 +18,17 @@ import cn.xgd.jdbc.bean.DBTableInfo;
 import cn.xgd.jdbc.utils.GDStringUtils;
 import cn.xgd.jdbc.utils.ReflectUtils;
 
-
-/**  
+/**
  * 管理数据的类
- * @author xgd  
- * @date 2020年3月31日  
- */  
-public class GDQueryManager implements GDQuery{
-	
-	 
-	public static void main(String[] args) {
-		Connection  coll = null;
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			coll = DriverManager.getConnection("jdbc:mysql://localhost:3306/test2?serverTimezone=UTC&"
-					+ "characterEncoding=utf-8","root","xgd");
-			ps = (PreparedStatement) coll.prepareStatement("select * from student");
-			set = ps.executeQuery();
-			while (set.next()) {
-				System.out.println(set.getInt("id") + set.getString("name"));
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			try {
-				if (set != null) {
-					set.close();
-				}
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e2) {
-				// TODO: handle exception
-				e2.printStackTrace();
-			}
-			try {
-				if (coll != null) {
-					coll.close();
-				}
-			} catch (Exception e2) {
-				// TODO: handle exception
-			}
-		}
-	}
-
-	@Override
-	public List executeQueryTemplate(String sql, Object[] params, Class clazz) {
-		return null;
-	}
+ * 
+ * @author xgd
+ * @date 2020年3月31日
+ */
+public class GDQueryManager implements GDQuery {
 
 	@Override
 	public int excuteDML(String sql, Object[] params) {
+		System.out.println("##################\r\n" + sql + params);
 		// TODO Auto-generated method stub
 		Connection connection = GDDBManager.defalutManager().getConnection();
 		PreparedStatement ps = null;
@@ -81,14 +36,14 @@ public class GDQueryManager implements GDQuery{
 			ps = connection.prepareStatement(sql);
 			int index = 1;
 			for (Object object : params) {
-				ps.setObject(index ++,object);
+				ps.setObject(index++, object);
 			}
 			return ps.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return 0;
-		}finally {
+		} finally {
 			if (ps != null) {
 				try {
 					ps.close();
@@ -98,12 +53,7 @@ public class GDQueryManager implements GDQuery{
 				}
 			}
 			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e2) {
-					// TODO: handle exception
-					e2.printStackTrace();
-				}
+				GDDBManager.defalutManager().DeprecateConnection(connection);
 			}
 		}
 	}
@@ -114,49 +64,113 @@ public class GDQueryManager implements GDQuery{
 		// insert into table_name () values ()
 		StringBuilder builder = new StringBuilder();
 		DBTableInfo info = DBTableContext.poClassTableMap.get(obj.getClass());
-		
-		builder.append("insert into " + info.getTab_name() + " (" );
-		List<Object> resultList  = new ArrayList<Object>();
+
+		builder.append("insert into " + info.getTab_name() + " (");
+		List<Object> resultList = new ArrayList<Object>();
 		for (String key : info.getKeysSet().keySet()) {
-			resultList.add(ReflectUtils.objectGetMethod(obj,"set" + GDStringUtils.uppercaseString(key)));
-			builder.append(key +  ",");
+			Object valueOB = ReflectUtils.objectGetMethod(obj,key);
+			if (valueOB == null) {
+				continue;
+			}
+			resultList.add(valueOB);
+			builder.append(key + ",");
 		}
-		builder.deleteCharAt(builder.length() -1);
-		builder.append(" values (");
-		
+		builder.deleteCharAt(builder.length() - 1);
+		builder.append(") value (");
+
 		Iterator<Object> iterator = resultList.iterator();
-		while (iterator.next() != null) {
+		System.err.println(resultList);
+		while (iterator.hasNext()) {
 			builder.append("?,");
+			iterator.next();
 		}
 		builder.deleteCharAt(builder.length() - 1);
 		builder.append(")");
-		excuteDML(builder.toString(),resultList.toArray());
+		excuteDML(builder.toString(), resultList.toArray());
 	}
-	
 
 	@Override
 	public void delete(Object obj) {
 		// TODO Auto-generated method stub
-		//delete from table where id = ?
+		// delete from table where id = ?
 		StringBuilder builder = new StringBuilder();
 		DBTableInfo info = DBTableContext.poClassTableMap.get(obj.getClass());
 		DBColumnKey primaryKey = info.getPrimary_key();
-		
+
 		builder.append("delete from " + info.getTab_name() + " where " + primaryKey.getColumn_name() + " = ?");
-		
-		excuteDML(builder.toString(),new Object[] {ReflectUtils.objectGetMethod(objc, primaryKey.getColumn_name())});
+
+		excuteDML(builder.toString(), new Object[] { ReflectUtils.objectGetMethod(obj, primaryKey.getColumn_name()) });
 	}
 
 	@Override
-	public int update(Object obj, String[] fieldNames) {
+	public int update(Object obj, String[] field) {
 		// TODO Auto-generated method stub
-		return 0{
+		StringBuilder builder = new StringBuilder();
+		DBTableInfo info = DBTableContext.poClassTableMap.get(obj.getClass());
+		DBColumnKey primaryKey = info.getPrimary_key();
+
+		builder.append("update " + info.getTab_name() + " set ");
+		List<Object> resultList = new ArrayList<Object>();
+		for (String key : field) {
+			resultList.add(ReflectUtils.objectGetMethod(obj,key));
+			builder.append(key + "=?,");
+		}
+		builder.deleteCharAt(builder.length() - 1);
+		builder.append(" where " + primaryKey.getColumn_name() + "=?");
+		resultList.add(ReflectUtils.objectGetMethod(obj, primaryKey.getColumn_name()));
+
+		return excuteDML(builder.toString(), resultList.toArray());
 	}
 
 	@Override
 	public List queryRows(String sql, Class clazz, Object[] params) {
-		// TODO Auto-generated method stub
-		return null;
+		Connection collecton = GDDBManager.defalutManager().getConnection();
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			ps = collecton.prepareStatement(sql);
+			int i = 1;
+			for (Object object : params) {
+				ps.setObject(i++, object);
+			}
+			set = ps.executeQuery();
+			ResultSetMetaData meta = set.getMetaData();
+			List<Object> list = new ArrayList<Object>();
+			while (set.next()) {
+				Constructor<?> cs = clazz.getConstructor();
+				Object objc = cs.newInstance();
+				for (int j = 1; j <= meta.getColumnCount(); j++) {
+					String column_name = meta.getColumnLabel(j);
+					ReflectUtils.objectSetMethod(objc, column_name, set.getObject(column_name));
+				}
+				list.add(objc);
+			}
+			return list;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} finally {
+			if (set != null) {
+				try {
+					set.close();
+				} catch (Exception e2) {
+					// TODO: handle exception
+					e2.printStackTrace();
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (Exception e2) {
+					// TODO: handle exception
+					e2.printStackTrace();
+				}
+			}
+			if (collecton != null) {
+				GDDBManager.defalutManager().DeprecateConnection(collecton);
+			}
+		}
 	}
 
 	@Override

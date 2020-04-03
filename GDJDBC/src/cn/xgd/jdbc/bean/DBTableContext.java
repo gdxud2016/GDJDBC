@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.xgd.jdbc.connection.GDDBManager;
+import cn.xgd.jdbc.connection.MySQLTypeConvertor;
 import cn.xgd.jdbc.utils.GDJavaUtils;
 import cn.xgd.jdbc.utils.GDStringUtils;
 
@@ -18,6 +19,7 @@ import cn.xgd.jdbc.utils.GDStringUtils;
  * @author xgd
  * @date 2020年3月31日  
  */
+@SuppressWarnings(value = "all")
 public class DBTableContext {
 	
 	//这个表中的tableInfo也是定义的一个类大概意思就是能够记录下整张表，这里这个map就能记录整个database
@@ -50,7 +52,9 @@ public class DBTableContext {
                 
                 ResultSet set=dbmd.getColumns(null, "%", tableName ,"%");      //这里根据表名获取字段集，
                 while(set.next()){
-                	DBColumnKey ci= new DBColumnKey(set.getString("COLUMN_NAME"),set.getString("TYPE_NAME"));
+                	String sqlType = set.getString("TYPE_NAME");
+                	DBColumnKey ci= new DBColumnKey(set.getString("COLUMN_NAME"),sqlType,
+                			new MySQLTypeConvertor().SQLTypeConvertorToObjc(sqlType));
                     ti.getKeysSet().put(set.getString("COLUMN_NAME"),ci);               //这里是放到表映射，加载表的字段
                 }
                 
@@ -70,7 +74,9 @@ public class DBTableContext {
             // TODO: handle exception
         }
       //因为我们要再数据库中操作，程序事先是不知道你表中得每一项叫什么名字就没办法根据数据可定义好类，在用类来操作数据库    
-        updataJavaPOFile();                                         
+        updataJavaPOFile();  
+        
+        loadPOTables();
     }
                                                                 
     public static void updataJavaPOFile(){
@@ -80,17 +86,16 @@ public class DBTableContext {
         	GDJavaUtils.buildJavaClassFromTableInfo(t);
         }    
     }
-                                                                   
+                                                            
     public static void loadPOTables(){                
     	//这里就是用反射把这个类和产生自哪个表放在了一个表里，在后面的操作有用
         for(DBTableInfo tableInfo:tables.values()){
             try{
             	String className = GDStringUtils.uppercaseString(tableInfo.getTab_name());
-            	Class<?> cls = Class.forName(className);
+            	Class<?> cls = Class.forName(GDConfiguration.shareConfiguration().getPackageName() +"." + className);
             	poClassTableMap.put(cls , tableInfo);
             }catch(Exception e){
                 e.printStackTrace();
-                
             }
         }    
         

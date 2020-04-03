@@ -10,10 +10,13 @@ public class DBColumnKey {
 	private String column_name;
 	
 	private String type_name;
+	
+	private String sql_type_name;
 
-	public DBColumnKey(String column_name, String type_name) {
+	public DBColumnKey(String column_name,String sqlType, String type_name) {
 		super();
 		this.column_name = column_name;
+		this.sql_type_name = sqlType;
 		this.type_name = type_name;
 	}
 
@@ -33,7 +36,15 @@ public class DBColumnKey {
 	public void setType_name(String type_name) {
 		this.type_name = type_name;
 	}
-	
-	
+
+
+	public void setSql_type_name(String sql_type_name) {
+		this.sql_type_name = sql_type_name;
+	}
+
+
+	public String getSql_type_name() {
+		return sql_type_name;
+	}
 	
 }

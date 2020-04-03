@@ -33,23 +33,8 @@ public class DBTableInfo {
 	
 	public DBTableInfo(){
 		this.primaryKeysSet = new ArrayList<DBColumnKey>();
-	}
-	
-
-	public DBTableInfo(String tab_name, DBColumnKey primary_key) {
-		super();
-		this.tab_name = tab_name;
-		this.primary_key = primary_key;
 		this.keysSet = new HashMap<String, DBColumnKey>();
 	}
-	
-	public DBTableInfo(String tab_name, Map<String,DBColumnKey> keysSet, DBColumnKey primary_key) {
-		super();
-		this.tab_name = tab_name;
-		this.keysSet = keysSet;
-		this.primary_key = primary_key;
-	}
-
 
 //	setter and getter
 	public String getTab_name() {

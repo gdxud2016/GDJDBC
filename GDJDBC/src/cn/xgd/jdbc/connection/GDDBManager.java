@@ -8,15 +8,15 @@ import java.util.List;
 
 import cn.xgd.jdbc.bean.GDConfiguration;
 
-
-/**  
+/**
  * 
- * @author xgd  
- * @date 2020年4月1日  
+ * @author xgd
+ * @date 2020年4月1日
  */
 public class GDDBManager {
 	private List<Connection> container;
 	private boolean isLoadMoreConnection = false;
+
 	/**
 	 * 单例私有构造器
 	 */
@@ -29,24 +29,25 @@ public class GDDBManager {
 			e.printStackTrace();
 		}
 	}
-	
-	private static class InnerManagerClass{
+
+	private static class InnerManagerClass {
 		static GDDBManager manager = new GDDBManager();
 	}
-	
-	/**  
+
+	/**
 	 * 管理创建connection创建的单例类
+	 * 
 	 * @return GDDBManager
-	 */  
+	 */
 	public static GDDBManager defalutManager() {
 		return InnerManagerClass.manager;
 	}
-	
-	public Connection createCollection(){
+
+	public Connection createCollection() {
 		try {
 			synchronized (this) {
-				Connection co = DriverManager.
-						getConnection(GDConfiguration.shareConfiguration().getDBLinker());
+				GDConfiguration conf = GDConfiguration.shareConfiguration();
+				Connection co = DriverManager.getConnection(conf.getDBLinker(), conf.getUsername(), conf.getPassword());
 				container.add(co);
 				return co;
 			}
@@ -56,12 +57,12 @@ public class GDDBManager {
 			return null;
 		}
 	}
-	
+
 	public Connection getConnection() {
 		Integer min = GDConfiguration.shareConfiguration().getPoolMin();
 		Integer max = GDConfiguration.shareConfiguration().getPoolMax();
 		int poolSize = container.size();
-		if (poolSize < min && isLoadMoreConnection == false){
+		if (poolSize < min && isLoadMoreConnection == false) {
 			int addCount = (max + min) / 2 - poolSize + 1;
 			loadMoreConnection(addCount);
 		}
@@ -70,20 +71,20 @@ public class GDDBManager {
 		}
 		return container.remove(poolSize - 1);
 	}
-	
-	private void loadMoreConnection(Integer count){
-		new Thread(){
+
+	private void loadMoreConnection(Integer count) {
+		new Thread() {
 			@Override
 			public void run() {
 				isLoadMoreConnection = true;
-				for (int i = 0; i < count ; i++) {
+				for (int i = 0; i < count; i++) {
 					createCollection();
 				}
 				isLoadMoreConnection = false;
 			};
 		}.start();
 	}
-	
+
 	public void DeprecateConnection(Connection co) {
 		Integer max = GDConfiguration.shareConfiguration().getPoolMax();
 		int poolSize = container.size();
