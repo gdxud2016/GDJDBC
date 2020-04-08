@@ -19,7 +19,7 @@ public interface GDQuery {
 
 	public int excuteDML(String sql, Object[] params);
 
-	public List queryRows(String sql, Class clazz, Object[] params);
+	public List<Object> queryRows(String sql, Class clazz, Object[] params);
 
 	public Object queryUniqueRows(String sql, Class clazz, Object[] params);
 

@@ -2,7 +2,6 @@ package cn.xgd.jdbc.connection;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -10,12 +9,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 
 import cn.xgd.jdbc.bean.DBColumnKey;
 import cn.xgd.jdbc.bean.DBTableContext;
 import cn.xgd.jdbc.bean.DBTableInfo;
-import cn.xgd.jdbc.utils.GDStringUtils;
 import cn.xgd.jdbc.utils.ReflectUtils;
 
 /**
